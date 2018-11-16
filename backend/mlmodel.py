@@ -16,13 +16,14 @@ import numpy as np
 import pandas as pd
 import keras.backend as K
 import requests
+from KEY import API_SECRET_KEY
 
-BASE_URL = 'https://api.iextrading.com/1.0'
 ticker = 'AAPL'
+BASE_URL = f'https://www.alphavantage.co/query'
 FUTURE_PERIOD_PREDICT = 5
-SEQ_LEN=10
-EPOCHS=5
-BATCH_SIZE=20
+SEQ_LEN=20
+EPOCHS=1
+BATCH_SIZE=5
 
 #function to create the labels for the data.
 def classify(current, future):
@@ -52,6 +53,8 @@ def preprocess_df(df):
             sequential_data.append([np.array(prev_days), i[-1]])  # append those bad boys!
 
     random.shuffle(sequential_data)  # shuffle for good measure.
+
+    print(sequential_data)
 
     buys = []  # list that will store our buy sequences and targets
     sells = []  # list that will store our sell sequences and targets
@@ -83,26 +86,36 @@ def preprocess_df(df):
     return np.array(X), y  # return X and y...and make X a numpy array!
 
 #send response to server
-resp = requests.get(f'{BASE_URL}/stock/{ticker}/chart/5y')
+resp = requests.get(f'{BASE_URL}',
+        params={
+            "function":"TIME_SERIES_DAILY",
+            "symbol":f'{ticker}',
+            # "outputsize":'full',
+            "apikey":API_SECRET_KEY
+        })
+
+respData = resp.json()
 
 #convert to dataframe
-df = pd.DataFrame(data=resp.json())
+df = pd.DataFrame(data=respData['Time Series (Daily)'],dtype='float') #pct_change function only takes float data. changing type to float.
 
-#set date as index.
-df.set_index('date',inplace=True)
+df = df.T #transpose the data so each row is a date.
 
-df = df[['volume','high','low','vwap','close']]
+df.rename(columns={'1. open':'open','2. high':'high','3. low':'low','4. close':'close','5. volume':'volume'},inplace=True)
+
+df.index.names=['date']#set date as index.
 
 df['future'] = df['close'].shift(-FUTURE_PERIOD_PREDICT)
 df['target'] = list(map(classify, df['close'], df['future']))
 
 df.dropna(inplace=True)
 
+print(df.head())
 times = sorted(df.index.values)
-last_5pct = sorted(df.index.values)[-int(0.05*len(times))]
+last_pct = sorted(df.index.values)[-int(0.10*len(times))]
 
-validation_main_df = df[(df.index >= last_5pct)]
-main_df = df[(df.index < last_5pct)]
+validation_main_df = df[(df.index >= last_pct)]
+main_df = df[(df.index < last_pct)]
 
 train_x, train_y = preprocess_df(main_df)
 validation_x, validation_y = preprocess_df(validation_main_df)
@@ -112,6 +125,7 @@ print(f"Dont buys: {train_y.count(0)}, buys: {train_y.count(1)}")
 print(f"VALIDATION Dont buys: {validation_y.count(0)}, buys: {validation_y.count(1)}")
 
 model = Sequential()
+
 model.add(LSTM(128, input_shape=(train_x.shape[1:]), return_sequences=True))
 model.add(Dropout(0.2))
 model.add(BatchNormalization())
@@ -128,7 +142,6 @@ model.add(Dense(32, activation='relu'))
 model.add(Dropout(0.2))
 
 model.add(Dense(2, activation='softmax'))
-
 
 opt = keras.optimizers.Adam(lr=0.001, decay=1e-6)
 
