@@ -18,12 +18,13 @@ import keras.backend as K
 import requests
 from KEY import API_SECRET_KEY
 
-ticker = 'SPY'
+ticker = 'AAPL'
 BASE_URL = f'https://www.alphavantage.co/query'
 FUTURE_PERIOD_PREDICT = 5
 SEQ_LEN=30 #number of days for a sequence to predice a 'buy' or 'sell'
-EPOCHS=70
-BATCH_SIZE=5
+EPOCHS=2
+BATCH_SIZE=10
+PCT=0.1
 
 #function to create the labels for the data.
 def classify(current, future):
@@ -112,7 +113,7 @@ df['target'] = list(map(classify, df['close'], df['future']))
 df.dropna(inplace=True)
 
 times = sorted(df.index.values)
-last_pct = sorted(df.index.values)[-int(0.30*len(times))]
+last_pct = sorted(df.index.values)[-int(PCT*len(times))]
 
 validation_main_df = df[(df.index >= last_pct)]
 main_df = df[(df.index < last_pct)]
@@ -169,3 +170,5 @@ score = model.evaluate(validation_x, validation_y, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 print('Score:', score)
+
+# Make a prediction
