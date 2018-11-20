@@ -24,6 +24,7 @@ SEQ_LEN=10
 EPOCHS=5
 BATCH_SIZE=20
 
+#1##########################################################
 #function to create the labels for the data.
 def classify(current, future):
     if float(future) > float(current)*1.01:  # if the future price is higher than the current by 1%, that's a buy, or a 1
@@ -31,6 +32,7 @@ def classify(current, future):
     else:  # otherwise... it's a 0!
         return 0
 
+#2#########################################################
 def preprocess_df(df):
     df = df.drop("future", 1)  # don't need this anymore.
 
@@ -82,6 +84,7 @@ def preprocess_df(df):
 
     return np.array(X), y  # return X and y...and make X a numpy array!
 
+#3##############################################################################
 #send response to server
 resp = requests.get(f'{BASE_URL}/stock/{ticker}/chart/5y')
 
@@ -106,6 +109,8 @@ main_df = df[(df.index < last_5pct)]
 
 train_x, train_y = preprocess_df(main_df)
 validation_x, validation_y = preprocess_df(validation_main_df)
+
+#4.######################################################################################
 
 print(f"train data: {len(train_x)} validation: {len(validation_x)}")
 print(f"Dont buys: {train_y.count(0)}, buys: {train_y.count(1)}")
