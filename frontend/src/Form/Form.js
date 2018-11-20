@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 /** Overall Form component:
- *  -
+ *  - Form that handles ticker selection
  *
  */
 
@@ -24,7 +24,7 @@ class Form extends Component {
 
   handleSubmit(evt) {
     evt.preventDefault();
-    this.props.prediction(this.state.ticker);
+    this.props.ticker(this.state.ticker);
     this.setState({ ticker: '' });
   }
 
