@@ -18,13 +18,13 @@ import keras.backend as K
 import requests
 from KEY import API_SECRET_KEY
 
-ticker = 'AAPL'
+ticker = 'SPY'
 BASE_URL = f'https://www.alphavantage.co/query'
-FUTURE_PERIOD_PREDICT = 6
-SEQ_LEN=5 #number of days for a sequence to predice a 'buy' or 'sell'
-EPOCHS=20
+SEQ_LEN=10 #number of days for a sequence to predice a 'buy' or 'sell'
+FUTURE_PERIOD_PREDICT = SEQ_LEN+1
+EPOCHS=50
 BATCH_SIZE=10
-PCT=0.1
+PCT=0.05
 
 #function to create the labels for the data.
 def classify(current, future):
@@ -105,8 +105,6 @@ def prediction_preprocess_df(df):
         prev_days.append([n for n in i[:-1]])  # store all but the target
         if len(prev_days) == FUTURE_PERIOD_PREDICT-1:  # make sure we have SEQ_LEN sequences!
             sequential_data.append([np.array(prev_days), i[-1]])  # append those bad boys!
-
-    print(sequential_data)
 
     X = []
     y = []
@@ -206,5 +204,15 @@ print('Test accuracy:', score[1])
 
 # Make a prediction
 
-predictions = model.predict(prediction_x)
+predictions = model.predict(
+    prediction_x,
+    batch_size=BATCH_SIZE,
+    verbose=1,
+    # max_queue_size=10,
+    # workers=1,
+    # use_multiprocessing=True
+)
+
+probability = model.predict_proba(prediction_x)
 print('Predictions', predictions)
+print('Probability', probability)
