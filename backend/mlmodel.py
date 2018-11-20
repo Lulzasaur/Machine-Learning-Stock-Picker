@@ -16,13 +16,15 @@ import numpy as np
 import pandas as pd
 import keras.backend as K
 import requests
+from KEY import API_SECRET_KEY
 
-BASE_URL = 'https://api.iextrading.com/1.0'
 ticker = 'AAPL'
+BASE_URL = f'https://www.alphavantage.co/query'
 FUTURE_PERIOD_PREDICT = 5
-SEQ_LEN=10
-EPOCHS=5
-BATCH_SIZE=20
+SEQ_LEN=30 #number of days for a sequence to predice a 'buy' or 'sell'
+EPOCHS=2
+BATCH_SIZE=10
+PCT=0.1
 
 #1##########################################################
 #function to create the labels for the data.
@@ -44,21 +46,24 @@ def preprocess_df(df):
 
     df.dropna(inplace=True)  # cleanup again... jic.
 
-
     sequential_data = []  # this is a list that will CONTAIN the sequences
     prev_days = deque(maxlen=SEQ_LEN)  # These will be our actual sequences. They are made with deque, which keeps the maximum length by popping out older values as new ones come in
 
     for i in df.values:  # iterate over the values
         prev_days.append([n for n in i[:-1]])  # store all but the target
-        if len(prev_days) == SEQ_LEN:  # make sure we have 60 sequences!
+        if len(prev_days) == SEQ_LEN:  # make sure we have SEQ_LEN sequences!
             sequential_data.append([np.array(prev_days), i[-1]])  # append those bad boys!
 
     random.shuffle(sequential_data)  # shuffle for good measure.
+
+    #above code constructs a list of "sequential" data (of SEQ_LEN long). the list will be fed
+    #into the ML model
 
     buys = []  # list that will store our buy sequences and targets
     sells = []  # list that will store our sell sequences and targets
 
     for seq, target in sequential_data:  # iterate over the sequential data
+
         if target == 0:  # if it's a "not buy"
             sells.append([seq, target])  # append to sells list
         elif target == 1:  # otherwise if the target is a 1...
@@ -86,15 +91,24 @@ def preprocess_df(df):
 
 #3##############################################################################
 #send response to server
-resp = requests.get(f'{BASE_URL}/stock/{ticker}/chart/5y')
+resp = requests.get(f'{BASE_URL}',
+        params={
+            "function":"TIME_SERIES_DAILY",
+            "symbol":f'{ticker}',
+            "outputsize":'full',
+            "apikey":API_SECRET_KEY
+        })
+
+respData = resp.json()
 
 #convert to dataframe
-df = pd.DataFrame(data=resp.json())
+df = pd.DataFrame(data=respData['Time Series (Daily)'],dtype='float') #pct_change function only takes float data. changing type to float.
 
-#set date as index.
-df.set_index('date',inplace=True)
+df = df.T #transpose the data so each row is a date.
 
-df = df[['volume','high','low','vwap','close']]
+df.rename(columns={'1. open':'open','2. high':'high','3. low':'low','4. close':'close','5. volume':'volume'},inplace=True)
+
+df.index.names=['date']#set date as index.
 
 df['future'] = df['close'].shift(-FUTURE_PERIOD_PREDICT)
 df['target'] = list(map(classify, df['close'], df['future']))
@@ -102,10 +116,10 @@ df['target'] = list(map(classify, df['close'], df['future']))
 df.dropna(inplace=True)
 
 times = sorted(df.index.values)
-last_5pct = sorted(df.index.values)[-int(0.05*len(times))]
+last_pct = sorted(df.index.values)[-int(PCT*len(times))]
 
-validation_main_df = df[(df.index >= last_5pct)]
-main_df = df[(df.index < last_5pct)]
+validation_main_df = df[(df.index >= last_pct)]
+main_df = df[(df.index < last_pct)]
 
 train_x, train_y = preprocess_df(main_df)
 validation_x, validation_y = preprocess_df(validation_main_df)
@@ -117,6 +131,7 @@ print(f"Dont buys: {train_y.count(0)}, buys: {train_y.count(1)}")
 print(f"VALIDATION Dont buys: {validation_y.count(0)}, buys: {validation_y.count(1)}")
 
 model = Sequential()
+
 model.add(LSTM(128, input_shape=(train_x.shape[1:]), return_sequences=True))
 model.add(Dropout(0.2))
 model.add(BatchNormalization())
@@ -133,7 +148,6 @@ model.add(Dense(32, activation='relu'))
 model.add(Dropout(0.2))
 
 model.add(Dense(2, activation='softmax'))
-
 
 opt = keras.optimizers.Adam(lr=0.001, decay=1e-6)
 
@@ -161,3 +175,5 @@ score = model.evaluate(validation_x, validation_y, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 print('Score:', score)
+
+# Make a prediction
