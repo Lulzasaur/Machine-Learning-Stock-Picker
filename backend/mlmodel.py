@@ -214,4 +214,9 @@ predictions = model.predict(
 )
 
 probability = model.predict_proba(prediction_x)
+<<<<<<< HEAD
 print('Predictions', predictions)
+=======
+print('Predictions', predictions)
+
+>>>>>>> 4eaa782edf1c7c23e334c949fac38b36ecdefc30
