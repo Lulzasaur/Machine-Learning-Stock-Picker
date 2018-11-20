@@ -2,6 +2,15 @@ import React, {Component} from 'react'
 import Form from '../Form/Form'
 import DisplayContainer from '../DisplayContainer/DisplayContainer'
 
+/** Overall Container Component:
+ * 
+ *  - Has local state
+ *  - Shows form and prediction
+ *  - Has function that is passed down to Form
+ *  - Has data/response/prediction that is passed down to DisplayContainer
+ * 
+ * 
+ */
 
 class Container extends Component {
 //TODO: Refactor to expirimental JS (bind via arrow func)
@@ -12,17 +21,20 @@ class Container extends Component {
   }
 
   //function to pass to Form to grab info and make prediction
+  sendTicker(ticker) {
+    //TODO: Wait until we know what backend looks like
+    //Axios call should be in here?
+    /* ...code goes here... */
 
-  //function for API call
-
-
+    // this.setState at the end? 
+  }
 
   render() {
 
     return(
       <React.Fragment>
         <h1>Select a ticker</h1>
-      <Form />
+      <Form ticker={this.sendTicker}/>
       {/* 'prediction' is the response from the backend
           ready to pass to DisplayContainer */}
       <DisplayContainer prediction={this.state}/>

@@ -1,0 +1,43 @@
+import React, { Component } from 'react';
+
+/** Overall Form component:
+ *  -
+ *
+ */
+
+//TODO: Refactor to make multi-use
+class Form extends Component {
+  constructor(props) {
+    super(props);
+    //local state for form
+    this.state = {
+      ticker: ''
+    };
+
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(evt) {
+    this.setState({ [evt.target.name]: [evt.target.value] });
+  }
+
+  handleSubmit(evt) {
+    evt.preventDefault();
+    this.props.prediction(this.state.ticker);
+    this.setState({ ticker: '' });
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <form onSubmit={this.handleSubmit}>
+          <label htmlFor="">Select Ticker</label>
+          <select onChange={this.handleChange}>
+            <option value=""></option>
+            <option value="AAPL">Apple</option>
+        </form>
+      </React.Fragment>
+    );
+  }
+}
