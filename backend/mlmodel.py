@@ -215,4 +215,4 @@ predictions = model.predict(
 
 probability = model.predict_proba(prediction_x)
 print('Predictions', predictions)
-print('Probability', probability)
+
