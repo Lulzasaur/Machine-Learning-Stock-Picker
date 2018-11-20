@@ -1,3 +1,8 @@
+/**
+ * COMPONENT HIERARCHY:
+ * https://docs.google.com/drawings/d/1YpgTfRmAHL9connFeR6cSBvD4-hMTtZACfN0oWHIxFQ/edit?usp=sharing
+ * 
+ */
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
