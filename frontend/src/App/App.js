@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import { Route, NavLink, Switch } from 'react-router-dom';
 import DisplayContainer from '../DisplayContainer/DisplayContainer';
