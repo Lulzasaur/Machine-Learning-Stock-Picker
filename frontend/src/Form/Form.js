@@ -33,8 +33,13 @@ class Form extends Component {
       <React.Fragment>
         <form onSubmit={this.handleSubmit}>
           <label htmlFor="">Select Ticker</label>
-          <select onChange={this.handleChange}>
+          <select name="ticker"
+            id="ticker"
+            required="required"
+            value={this.state.ticker}
+            onChange={this.handleChange}>
             <option value=""></option>
+            {/* TODO: Once we have more tickers, make this dynamic or expand */}
             <option value="AAPL">Apple</option>
         </form>
       </React.Fragment>
