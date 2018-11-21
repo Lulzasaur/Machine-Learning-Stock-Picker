@@ -22,7 +22,7 @@ ticker = 'SPY'
 BASE_URL = f'https://www.alphavantage.co/query'
 SEQ_LEN=10 #number of days for a sequence to predice a 'buy' or 'sell'
 FUTURE_PERIOD_PREDICT = SEQ_LEN+1
-EPOCHS=50
+EPOCHS=2
 BATCH_SIZE=10
 PCT=0.05
 
@@ -195,7 +195,7 @@ history = model.fit(
     # callbacks=[tensorboard, checkpoint],
 )
 
-print(history)
+print('history',history.history)
 
 # Score model
 score = model.evaluate(validation_x, validation_y, verbose=0)
@@ -214,9 +214,7 @@ predictions = model.predict(
 )
 
 probability = model.predict_proba(prediction_x)
-<<<<<<< HEAD
-print('Predictions', predictions)
-=======
-print('Predictions', predictions)
-
->>>>>>> 4eaa782edf1c7c23e334c949fac38b36ecdefc30
+history_predictions = model.predict(train_x)
+print('Historic Predictions',history_predictions)
+print('Historic Answers',train_y)
+print('Predictions', predictions[0])
