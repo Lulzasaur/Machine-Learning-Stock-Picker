@@ -1,10 +1,12 @@
 from flask import Flask, request, redirect, render_template, jsonify, session
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_cors import CORS
 from Model import MlModel
 import requests
 from KEY import API_SECRET_KEY
 
 app = Flask(__name__)
+CORS(app)
 
 BASE_URL = f'https://www.alphavantage.co/query'
 
