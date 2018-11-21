@@ -22,7 +22,7 @@ ticker = 'SPY'
 BASE_URL = f'https://www.alphavantage.co/query'
 SEQ_LEN=10 #number of days for a sequence to predice a 'buy' or 'sell'
 FUTURE_PERIOD_PREDICT = SEQ_LEN+1
-EPOCHS=2
+EPOCHS=1
 BATCH_SIZE=10
 PCT=0.05
 
@@ -34,6 +34,7 @@ def classify(current, future):
         return 0
 
 def preprocess_df(df):
+
     df = df.drop("future", 1)  # don't need this anymore.
 
     for col in df.columns:  # go through all of the columns
@@ -115,6 +116,37 @@ def prediction_preprocess_df(df):
 
     return np.array(X), y  # return X and y...and make X a numpy array!
 
+def historic_preprocess_df(df):
+
+    df = df.drop("future", 1)  # don't need this anymore.
+
+    for col in df.columns:  # go through all of the columns
+        if col != "target":  # normalize all ... except for the target itself!
+            df[col] = df[col].pct_change()  # pct change "normalizes" the different prices
+            # df.dropna(inplace=True)  # remove the nas created by pct_change
+            df[col] = preprocessing.scale(df[col].values)  # scale between 0 and 1.
+
+    df.dropna(inplace=True)  # cleanup again... jic.
+
+    sequential_data = []  # this is a list that will CONTAIN the sequences
+    prev_days = deque(maxlen=FUTURE_PERIOD_PREDICT-1)  # These will be our actual sequences. They are made with deque, which keeps the maximum length by popping out older values as new ones come in
+
+    for i in df.values:  # iterate over the values
+        prev_days.append([n for n in i[:-1]])  # store all but the target
+        if len(prev_days) == FUTURE_PERIOD_PREDICT-1:  # make sure we have SEQ_LEN sequences!
+            sequential_data.append([df.index, np.array(prev_days), i[-1]])  # append those bad boys!
+
+    X = [] #list of all the values being processed by the ML - what the ML uses to make a prediction
+    y = [] #list of all the answers
+    z = [] # list of all the dates in X
+
+    for index, seq, target in sequential_data:  # going over our new sequential data
+        z.append(index)
+        X.append(seq)  # X is the sequences
+        y.append(target)  # y is the targets/labels (buys vs sell/notbuy)
+
+    return np.array(X), y, z  # return X and y...and make X a numpy array!
+
 #send response to server
 resp = requests.get(f'{BASE_URL}',
         params={
@@ -152,10 +184,16 @@ train_x, train_y = preprocess_df(main_df)
 validation_x, validation_y = preprocess_df(validation_main_df)
 prediction_x, prediction_y = prediction_preprocess_df(prediction_df)
 
+historic_prediction_x, historic_prediction_y, historic_prediction_dates = historic_preprocess_df(df)
+
+print(df.head())
+print('historic_prediction x', len(historic_prediction_x))
+print('historic_prediction y', len(historic_prediction_y))
+
 print(f"train data: {len(train_x)} validation: {len(validation_x)}")
 print(f"Dont buys: {train_y.count(0)}, buys: {train_y.count(1)}")
 print(f"VALIDATION Dont buys: {validation_y.count(0)}, buys: {validation_y.count(1)}")
-print('Prediction X: ',prediction_x )
+
 
 model = Sequential()
 
@@ -195,7 +233,7 @@ history = model.fit(
     # callbacks=[tensorboard, checkpoint],
 )
 
-print('history',history.history)
+# print('history',history.history)
 
 # Score model
 score = model.evaluate(validation_x, validation_y, verbose=0)
@@ -214,7 +252,6 @@ predictions = model.predict(
 )
 
 probability = model.predict_proba(prediction_x)
-history_predictions = model.predict(train_x)
-print('Historic Predictions',history_predictions)
-print('Historic Answers',train_y)
+historic_predictions = model.predict(historic_prediction_x)
+print(historic_predictions)
 print('Predictions', predictions[0])
