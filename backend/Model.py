@@ -18,8 +18,8 @@ import keras.backend as K
 import requests
 from KEY import API_SECRET_KEY
 
-FUTURE_PERIOD_PREDICT = 5
 SEQ_LEN=30 #number of days for a sequence to predice a 'buy' or 'sell'
+FUTURE_PERIOD_PREDICT = SEQ_LEN + 1
 EPOCHS=1
 BATCH_SIZE=10
 PCT=0.1
@@ -84,13 +84,42 @@ def preprocess_df(df):
 
     return np.array(X), y  # return X and y...and make X a numpy array!
 
+def prediction_preprocess_df(df):
+    df = df.drop("future", 1)  # don't need this anymore.
+
+    for col in df.columns:  # go through all of the columns
+        if col != "target":  # normalize all ... except for the target itself!
+            df[col] = df[col].pct_change()  # pct change "normalizes" the different prices
+            # df.dropna(inplace=True)  # remove the nas created by pct_change
+            df[col] = preprocessing.scale(df[col].values)  # scale between 0 and 1.
+
+    df.dropna(inplace=True)  # cleanup again... jic.
+
+    sequential_data = []  # this is a list that will CONTAIN the sequences
+    prev_days = deque(maxlen=FUTURE_PERIOD_PREDICT-1)  # These will be our actual sequences. They are made with deque, which keeps the maximum length by popping out older values as new ones come in
+
+    for i in df.values:  # iterate over the values
+        prev_days.append([n for n in i[:-1]])  # store all but the target
+        if len(prev_days) == FUTURE_PERIOD_PREDICT-1:  # make sure we have SEQ_LEN sequences!
+            sequential_data.append([np.array(prev_days), i[-1]])  # append those bad boys!
+
+    X = []
+    y = []
+
+    for seq, target in sequential_data:  # going over our new sequential data
+        X.append(seq)  # X is the sequences
+        y.append(target)  # y is the targets/labels (buys vs sell/notbuy)
+
+    return np.array(X), y  # return X and y...and make X a numpy array!
+
 
 class MlModel:
 
     @staticmethod
     def clean_data(dataSet, typeData):
         
-        df = pd.DataFrame(data=dataSet, dtype=typeData) #pct_change function only takes float data. changing type to float.
+        #convert to dataframe
+        df = pd.DataFrame(data=dataSet,dtype=typeData) #pct_change function only takes float data. changing type to float.
 
         df = df.T #transpose the data so each row is a date.
 
@@ -100,6 +129,8 @@ class MlModel:
 
         df['future'] = df['close'].shift(FUTURE_PERIOD_PREDICT)
         df['target'] = list(map(classify, df['close'], df['future']))
+
+        prediction_df = df[0:FUTURE_PERIOD_PREDICT]
 
         df.dropna(inplace=True)
 
@@ -111,6 +142,7 @@ class MlModel:
 
         train_x, train_y = preprocess_df(main_df)
         validation_x, validation_y = preprocess_df(validation_main_df)
+        prediction_x, prediction_y = prediction_preprocess_df(prediction_df)
 
         return {
             "train_x": train_x,
@@ -118,14 +150,13 @@ class MlModel:
             "validation_x": validation_x,
             "validation_y": validation_y,
             "validation_main_df": validation_main_df,
-            "main_df": main_df
-
+            "main_df": main_df,
+            "prediction_x": prediction_x,
+            "prediction_y": prediction_y
         }
 
     @staticmethod
     def run_model(dataObject):
-
-        print(dataObject['train_x'])
 
         model = Sequential()
 
@@ -155,22 +186,33 @@ class MlModel:
             metrics=['accuracy']
         )
 
-        validation_data=(dataObject['validation_x'], dataObject['validation_y'])
-        print(dataObject['validation_x'])
+
         # Train model
         history = model.fit(
             dataObject['train_x'], dataObject['train_y'],
             batch_size=BATCH_SIZE,
             epochs=EPOCHS,
             validation_data=(dataObject['validation_x'], dataObject['validation_y'])
-        # callbacks=[tensorboard, checkpoint],
+            # callbacks=[tensorboard, checkpoint],
         )
 
+        print(history)
 
-        return(history)
+        # Score model
+        score = model.evaluate(dataObject['validation_x'], dataObject['validation_y'], verbose=0)
+        print('Test loss:', score[0])
+        print('Test accuracy:', score[1])
 
-        # # Score model
-        # score = model.evaluate(dataObject['validation_x'], dataObject['validation_y'], verbose=0)
-        # print('Test loss:', score[0])
-        # print('Test accuracy:', score[1])
-        # print('Score:', score)
+        # Make a prediction
+
+        predictions = model.predict(
+            dataObject['prediction_x'],
+            batch_size=BATCH_SIZE,
+            verbose=1,
+            # max_queue_size=10,
+            # workers=1,
+            # use_multiprocessing=True
+        )
+
+        probability = model.predict_proba(dataObject['prediction_x'])
+        return predictions[0]
