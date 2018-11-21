@@ -83,15 +83,23 @@ class Chart extends Component {
       series: [
         {
           name: 'AAPL',
-          data: [
-            //Highcharts uses JS Date Numbers which is why we're using Date.UTC
-            //Source: https://stackoverflow.com/questions/9548326/what-format-does-the-highcharts-js-library-accept-for-dates
-            // How it should be structured for each array within the main array:
-            // [Date.UTC(YYYY, MM - 1, DD, TT), VAL]
-            [Date.UTC(2012, 3, 6, 10), 5],
-            [Date.UTC(2012, 3, 6, 11), 6],
-            [Date.UTC(2012, 3, 6, 12), 4]
-          ],
+          //This set up might be easier for series
+          // DATE START
+          pointStart: Date.UTC(2012, 2, 6, 10),
+          // ONE DAY IN MILLISECONDS
+          pointInterval: 1000 * 60 * 60,
+          // VALUE
+          data: [5, 6, 4],
+          // DEPRECATED AS IT WAS EASIER TO MASSAGE DATA WITH THE ABOVE SETUP
+          // data: [
+          //   //Highcharts uses JS Date Numbers which is why we're using Date.UTC
+          //   //Source: https://stackoverflow.com/questions/9548326/what-format-does-the-highcharts-js-library-accept-for-dates
+          //   // How it should be structured for each array within the main array:
+          //   // [Date.UTC(YYYY, MM - 1, DD, TT), VAL]
+          //   [Date.UTC(2012, 3, 6, 10), 5],
+          //   [Date.UTC(2012, 3, 6, 11), 6],
+          //   [Date.UTC(2012, 3, 6, 12), 4]
+          // ],
           tooltip: {
             valueDecimals: 2
           }
