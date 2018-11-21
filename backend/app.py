@@ -23,9 +23,12 @@ def serialize_model_data(historic_pred, historic_dates):
     return response_array
 
 def serialize_dataframe(df):
-     """Function that takes dataframe and serializes it so that flask can convert
+    """Function that takes dataframe and serializes it so that flask can convert
     it to JSON"""
+    index_values = df.index.values
+    df['dates'] = index_values
     df_values = df.values.tolist()
+    print(df_values)
     response_array = []
     for values in df_values:
         data_object = {
@@ -35,7 +38,8 @@ def serialize_dataframe(df):
             'close': values[3],
             'volume': values[4],
             'future': values[5],
-            'target': values[6]
+            'target': values[6],
+            'date': values[7]
         }
         response_array.append(data_object)
     
@@ -60,7 +64,7 @@ def getStockPrediction(ticker):
 
     #response will be an array of objects where each object has a key of 0, 1 and date
     #0 and 1 have probability values
-    response = serialize(historic_predictions['historic_predictions'],historic_predictions['historic_prediction_dates'])
+    response = serialize_model_data(historic_predictions['historic_predictions'],historic_predictions['historic_prediction_dates'])
 
     return jsonify(response)
 
@@ -81,6 +85,7 @@ def getHistoricPrices(ticker):
     stock_data = api_resp.json()
     data = MlModel.clean_data(stock_data['Time Series (Daily)'],'float')
     dataframe = data['dataframe']
+    print(dataframe)
     response = serialize_dataframe(dataframe)
 
     return jsonify(response)
