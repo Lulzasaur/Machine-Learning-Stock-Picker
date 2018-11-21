@@ -131,21 +131,27 @@ def historic_preprocess_df(df):
     sequential_data = []  # this is a list that will CONTAIN the sequences
     prev_days = deque(maxlen=FUTURE_PERIOD_PREDICT-1)  # These will be our actual sequences. They are made with deque, which keeps the maximum length by popping out older values as new ones come in
 
+    index_values = df.index.values
+
+    df['dates'] = index_values
+
+    df.drop('target',axis=1,inplace=True)
+
     for i in df.values:  # iterate over the values
         prev_days.append([n for n in i[:-1]])  # store all but the target
         if len(prev_days) == FUTURE_PERIOD_PREDICT-1:  # make sure we have SEQ_LEN sequences!
-            sequential_data.append([df.index, np.array(prev_days), i[-1]])  # append those bad boys!
+            sequential_data.append([ np.array(prev_days), i[-1]])  # append those bad boys!
 
+    print(len(sequential_data))
     X = [] #list of all the values being processed by the ML - what the ML uses to make a prediction
-    y = [] #list of all the answers
-    z = [] # list of all the dates in X
+    y = [] #list of all the dates
 
-    for index, seq, target in sequential_data:  # going over our new sequential data
-        z.append(index)
+    for seq, dates in sequential_data:  # going over our new sequential data
+        # z.append(index)
         X.append(seq)  # X is the sequences
-        y.append(target)  # y is the targets/labels (buys vs sell/notbuy)
+        y.append(dates)  # y is the targets/labels (buys vs sell/notbuy)
 
-    return np.array(X), y, z  # return X and y...and make X a numpy array!
+    return np.array(X), y  # return X and y...and make X a numpy array!
 
 #send response to server
 resp = requests.get(f'{BASE_URL}',
@@ -184,7 +190,7 @@ train_x, train_y = preprocess_df(main_df)
 validation_x, validation_y = preprocess_df(validation_main_df)
 prediction_x, prediction_y = prediction_preprocess_df(prediction_df)
 
-historic_prediction_x, historic_prediction_y, historic_prediction_dates = historic_preprocess_df(df)
+historic_prediction_x, historic_prediction_dates = historic_preprocess_df(df)
 
 print(df.head())
 print('historic_prediction x', len(historic_prediction_x))
