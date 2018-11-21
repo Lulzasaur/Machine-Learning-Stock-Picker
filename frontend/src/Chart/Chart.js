@@ -85,9 +85,9 @@ class Chart extends Component {
           name: 'AAPL',
           //This set up might be easier for series
           // DATE START
-          pointStart: Date.UTC(2012, 2, 6, 10),
+          pointStart: Date.UTC(2012, 2, 6, 13),
           // ONE DAY IN MILLISECONDS
-          pointInterval: 1000 * 60 * 60,
+          pointInterval: 1000 * 60 * 60 * 24,
           // VALUE
           data: [5, 6, 4],
           // DEPRECATED AS IT WAS EASIER TO MASSAGE DATA WITH THE ABOVE SETUP
