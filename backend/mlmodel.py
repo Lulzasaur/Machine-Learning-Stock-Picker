@@ -259,5 +259,3 @@ predictions = model.predict(
 
 probability = model.predict_proba(prediction_x)
 historic_predictions = model.predict(historic_prediction_x)
-print(historic_predictions)
-print('Predictions', predictions[0])
