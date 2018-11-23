@@ -92,52 +92,11 @@ class Chart extends Component {
     } catch (err) {
       console.log('nice error, brochach');
     }
-    // let predictiveData = await axios.get('http://127.0.0.1:5000/silas/aapl');
-    // let predictiveData = [
-    //   { 0: 41, 1: 58, date: '2018-09-25' },
-    //   { 0: 49, 1: 50, date: '2018-09-24' },
-    //   { 0: 32, 1: 67, date: '2018-09-21' },
-    //   { 0: 46, 1: 53, date: '2018-09-20' },
-    //   { 0: 36, 1: 63, date: '2018-09-19' }
-    // ];
-    // const pointStartArray = predictiveData[
-    //   predictiveData.length - 1
-    // ].date.split('-');
-    // // console.log('what does the pSA look like', pointStartArray);
-    // this.setState({
-    //   predictiveOptions: {
-    //     rangeSelector: {
-    //       selected: 1
-    //     },
-
-    //     title: {
-    //       text: 'AAPL Stock Price'
-    //     },
-
-    //     series: [
-    //       {
-    //         name: 'AAPL',
-    //         pointStart: Date.UTC(
-    //           +pointStartArray[0],
-    //           +pointStartArray[1] - 1,
-    //           +pointStartArray[2]
-    //         ),
-    //         pointInterval: 1000 * 60 * 60 * 24,
-    // data: [1, 1, 1, 0, 1],
-    // tooltip: {
-    //   valueDecimals: 2
-    // }
-    //       }
-    //     ]
-    //   }
-    // });
-    // } catch (err) {
-    //   console.log('nice error, brochach');
-    // }
   }
   render() {
     return (
       <React.Fragment>
+        {/* TODO: Why is this is giving me a bug once it tries to render */}
         {/* {this.state.historicOptions.series.length === 0 ? (
           <h1 className="HistoricLoadingBar">Loading Historic Data</h1>
         ) : (
