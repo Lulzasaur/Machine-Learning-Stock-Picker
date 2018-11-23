@@ -24,10 +24,16 @@ class Chart extends Component {
   async componentDidMount() {
     try {
       console.log('getting data');
+      //Grabbing Historic Stock data for first Chart
       let historicData = await axios.get(
         'http://127.0.0.1:5000/silas/aapl/historics'
       );
-      console.log('whats the historic data', historicData);
+
+      //Since Data comes latest date first, we need to reverse and map
+      //In addition, to get it in the right format for the graph,
+      //We needed to split the starting date, convert it to Date.UTC (which is what
+      //highcharts uses), and place that with the closing price inside of its own
+      //array
 
       let data = await historicData.data.reverse().map(d => {
         let startingDate = d.date.split('-');
@@ -36,8 +42,8 @@ class Chart extends Component {
           d.close
         ];
       });
-      console.log(data);
 
+      //Updating the state so components re-render
       this.setState({
         historicOptions: {
           title: { text: 'AAPL' },
@@ -45,6 +51,37 @@ class Chart extends Component {
             {
               name: 'AAPL',
               data: data,
+              tooltip: {
+                valueDecimals: 2
+              }
+            }
+          ]
+        }
+      });
+
+      //Getting prediction data
+      let predictiveData = await axios.get('http://127.0.0.1:5000/silas/aapl');
+      console.log(predictiveData);
+
+      //Mapping prediction out
+      let prediction = await predictiveData.data.reverse().map(dPoint => {
+        let startingDate = dPoint.date.split('-');
+        let val = dPoint['0'] >= dPoint['1'] ? dPoint['0'] : dPoint['1'];
+        return [
+          Date.UTC(startingDate[0], startingDate[1], startingDate[2]),
+          val
+        ];
+      });
+      console.log('what does predict look like', prediction);
+
+      this.setState({
+        predictiveOptions: {
+          rangeSelector: { selected: 1 },
+          title: { text: 'AAPL Prediction' },
+          series: [
+            {
+              name: 'AAPL Prediction',
+              data: prediction,
               tooltip: {
                 valueDecimals: 2
               }
@@ -101,15 +138,18 @@ class Chart extends Component {
   render() {
     return (
       <React.Fragment>
-        {this.state.historicOptions.series.length === 0 ? (
+        {/* {this.state.historicOptions.series.length === 0 ? (
           <h1 className="HistoricLoadingBar">Loading Historic Data</h1>
         ) : (
-          <HighchartsReact
-            highcharts={Highcharts}
-            constructorType={'stockChart'}
-            options={this.state.historicOptions}
-          />
-        )}
+          <React.Fragment> */}
+        <h1>Historic Chart</h1>
+        <HighchartsReact
+          highcharts={Highcharts}
+          constructorType={'stockChart'}
+          options={this.state.historicOptions}
+        />
+        {/* </React.Fragment>
+        )} */}
         {this.state.predictiveOptions.series.length === 0 ? (
           <h1 className="Loading Bar">Loading Predictions</h1>
         ) : (
