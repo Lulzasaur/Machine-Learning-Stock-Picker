@@ -16,102 +16,15 @@ import numpy as np
 import pandas as pd
 import keras.backend as K
 import requests
+from helpers import classify, preprocess_df, prediction_preprocess_df, historic_preprocess_df
 from KEY import API_SECRET_KEY
+
 
 SEQ_LEN=30 #number of days for a sequence to predice a 'buy' or 'sell'
 FUTURE_PERIOD_PREDICT = SEQ_LEN + 1
 EPOCHS=1
 BATCH_SIZE=10
 PCT=0.1
-
-def classify(current, future):
-    if float(future) > float(current)*1.01:  # if the future price is higher than the current by 1%, that's a buy, or a 1
-        return 1
-    else:  # otherwise... it's a 0!
-        return 0
-
-def preprocess_df(df):
-    df = df.drop("future", 1)  # don't need this anymore.
-
-    for col in df.columns:  # go through all of the columns
-        if col != "target":  # normalize all ... except for the target itself!
-            df[col] = df[col].pct_change()  # pct change "normalizes" the different prices
-            df.dropna(inplace=True)  # remove the nas created by pct_change
-            df[col] = preprocessing.scale(df[col].values)  # scale between 0 and 1.
-
-    df.dropna(inplace=True)  # cleanup again... jic.
-
-    sequential_data = []  # this is a list that will CONTAIN the sequences
-    prev_days = deque(maxlen=SEQ_LEN)  # These will be our actual sequences. They are made with deque, which keeps the maximum length by popping out older values as new ones come in
-
-    for i in df.values:  # iterate over the values
-        prev_days.append([n for n in i[:-1]])  # store all but the target
-        if len(prev_days) == SEQ_LEN:  # make sure we have SEQ_LEN sequences!
-            sequential_data.append([np.array(prev_days), i[-1]])  # append those bad boys!
-
-    random.shuffle(sequential_data)  # shuffle for good measure.
-
-    #above code constructs a list of "sequential" data (of SEQ_LEN long). the list will be fed
-    #into the ML model
-
-    buys = []  # list that will store our buy sequences and targets
-    sells = []  # list that will store our sell sequences and targets
-
-    for seq, target in sequential_data:  # iterate over the sequential data
-
-        if target == 0:  # if it's a "not buy"
-            sells.append([seq, target])  # append to sells list
-        elif target == 1:  # otherwise if the target is a 1...
-            buys.append([seq, target])  # it's a buy!
-
-    random.shuffle(buys)  # shuffle the buys
-    random.shuffle(sells)  # shuffle the sells!
-
-    lower = min(len(buys), len(sells))  # what's the shorter length?
-
-    buys = buys[:lower]  # make sure both lists are only up to the shortest length.
-    sells = sells[:lower]  # make sure both lists are only up to the shortest length.
-
-    sequential_data = buys+sells  # add them together
-    random.shuffle(sequential_data)  # another shuffle, so the model doesn't get confused with all 1 class then the other.
-
-    X = []
-    y = []
-
-    for seq, target in sequential_data:  # going over our new sequential data
-        X.append(seq)  # X is the sequences
-        y.append(target)  # y is the targets/labels (buys vs sell/notbuy)
-
-    return np.array(X), y  # return X and y...and make X a numpy array!
-
-def prediction_preprocess_df(df):
-    df = df.drop("future", 1)  # don't need this anymore.
-
-    for col in df.columns:  # go through all of the columns
-        if col != "target":  # normalize all ... except for the target itself!
-            df[col] = df[col].pct_change()  # pct change "normalizes" the different prices
-            # df.dropna(inplace=True)  # remove the nas created by pct_change
-            df[col] = preprocessing.scale(df[col].values)  # scale between 0 and 1.
-
-    df.dropna(inplace=True)  # cleanup again... jic.
-
-    sequential_data = []  # this is a list that will CONTAIN the sequences
-    prev_days = deque(maxlen=FUTURE_PERIOD_PREDICT-1)  # These will be our actual sequences. They are made with deque, which keeps the maximum length by popping out older values as new ones come in
-
-    for i in df.values:  # iterate over the values
-        prev_days.append([n for n in i[:-1]])  # store all but the target
-        if len(prev_days) == FUTURE_PERIOD_PREDICT-1:  # make sure we have SEQ_LEN sequences!
-            sequential_data.append([np.array(prev_days), i[-1]])  # append those bad boys!
-
-    X = []
-    y = []
-
-    for seq, target in sequential_data:  # going over our new sequential data
-        X.append(seq)  # X is the sequences
-        y.append(target)  # y is the targets/labels (buys vs sell/notbuy)
-
-    return np.array(X), y  # return X and y...and make X a numpy array!
-
 
 class MlModel:
 
@@ -143,8 +56,10 @@ class MlModel:
         train_x, train_y = preprocess_df(main_df)
         validation_x, validation_y = preprocess_df(validation_main_df)
         prediction_x, prediction_y = prediction_preprocess_df(prediction_df)
+        historic_prediction_x, historic_prediction_dates = historic_preprocess_df(df)
 
         return {
+            "dataframe": df,
             "train_x": train_x,
             "train_y": train_y,
             "validation_x": validation_x,
@@ -152,7 +67,9 @@ class MlModel:
             "validation_main_df": validation_main_df,
             "main_df": main_df,
             "prediction_x": prediction_x,
-            "prediction_y": prediction_y
+            "prediction_y": prediction_y,
+            "historic_prediction_x": historic_prediction_x,
+            "historic_prediction_dates": historic_prediction_dates
         }
 
     @staticmethod
@@ -215,4 +132,9 @@ class MlModel:
         )
 
         probability = model.predict_proba(dataObject['prediction_x'])
-        return predictions[0]
+        historic_predictions = model.predict(dataObject['historic_prediction_x'])
+
+        return {
+            'historic_predictions': historic_predictions, 
+            'historic_prediction_dates': dataObject['historic_prediction_dates']
+        }
