@@ -153,11 +153,14 @@ class Chart extends Component {
         {this.state.predictiveOptions.series.length === 0 ? (
           <h1 className="Loading Bar">Loading Predictions</h1>
         ) : (
-          <HighchartsReact
-            highcharts={Highcharts}
-            constructorType={'stockChart'}
-            options={this.state.predictiveOptions}
-          />
+          <React.Fragment>
+            <h1>Prediction Chart</h1>
+            <HighchartsReact
+              highcharts={Highcharts}
+              constructorType={'stockChart'}
+              options={this.state.predictiveOptions}
+            />
+          </React.Fragment>
         )}
       </React.Fragment>
     );
