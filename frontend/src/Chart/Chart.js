@@ -66,7 +66,7 @@ class Chart extends Component {
       //Mapping prediction out
       let prediction = await predictiveData.data.reverse().map(dPoint => {
         let startingDate = dPoint.date.split('-');
-        let val = dPoint['0'] >= dPoint['1'] ? dPoint['0'] : dPoint['1'];
+        let val = dPoint['0'] >= dPoint['1'] ? 0 : 1;
         return [
           Date.UTC(startingDate[0], startingDate[1], startingDate[2]),
           val
