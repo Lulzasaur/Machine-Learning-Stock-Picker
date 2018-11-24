@@ -26,7 +26,7 @@ class Chart extends Component {
       console.log('getting data');
       //Grabbing Historic Stock data for first Chart
       let historicData = await axios.get(
-        'http://127.0.0.1:5000/silas/aapl/historics'
+        'http://127.0.0.1:5000/silas/spy/historics'
       );
 
       //Since Data comes latest date first, we need to reverse and map
@@ -46,10 +46,10 @@ class Chart extends Component {
       //Updating the state so components re-render
       this.setState({
         historicOptions: {
-          title: { text: 'AAPL' },
+          title: { text: 'SPY' },
           series: [
             {
-              name: 'AAPL',
+              name: 'SPY',
               data: data,
               tooltip: {
                 valueDecimals: 2
@@ -60,7 +60,7 @@ class Chart extends Component {
       });
 
       //Getting prediction data
-      let predictiveData = await axios.get('http://127.0.0.1:5000/silas/aapl');
+      let predictiveData = await axios.get('http://127.0.0.1:5000/silas/spy');
       console.log(predictiveData);
 
       //Mapping prediction out
@@ -77,10 +77,10 @@ class Chart extends Component {
       this.setState({
         predictiveOptions: {
           rangeSelector: { selected: 1 },
-          title: { text: 'AAPL Prediction' },
+          title: { text: 'SPY Prediction' },
           series: [
             {
-              name: 'AAPL Prediction',
+              name: 'SPY Prediction',
               data: prediction,
               tooltip: {
                 valueDecimals: 2
