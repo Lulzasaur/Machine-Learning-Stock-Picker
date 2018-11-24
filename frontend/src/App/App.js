@@ -63,6 +63,7 @@ class App extends Component {
                     Tickers
                   </DropdownToggle>
                   <DropdownMenu right>
+                    <DropdownItem href="">SPY ETF</DropdownItem>
                     <DropdownItem href="https://apple.com">Apple</DropdownItem>
                     <DropdownItem href="https://microsoft.com">
                       Microsoft

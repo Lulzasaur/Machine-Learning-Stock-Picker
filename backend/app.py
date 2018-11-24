@@ -1,17 +1,14 @@
 from flask import Flask, request, redirect, render_template, jsonify, session
-from flask_debugtoolbar import DebugToolbarExtension
+# from flask_debugtoolbar import DebugToolbarExtension
 from flask_cors import CORS
 from Model import MlModel
 import requests
 from KEY import API_SECRET_KEY
-from flask_cors import CORS
+
 
 app = Flask(__name__)
 CORS(app)
-<<<<<<< HEAD
 BASE_URL = f"https://www.alphavantage.co/query"
-=======
->>>>>>> c350fd768ac6c9cf71676c2bdfe7cccbb6e42d13
 
 
 def serialize_model_data(historic_pred, historic_dates):
@@ -35,15 +32,6 @@ def serialize_dataframe(df):
     response_array = []
     for values in df_values:
         data_object = {
-<<<<<<< HEAD
-            "open": values[0],
-            "high": values[1],
-            "low": values[2],
-            "close": values[3],
-            "volume": values[4],
-            "future": values[5],
-            "target": values[6],
-=======
             'open': values[0],
             'high': values[1],
             'low': values[2],
@@ -52,7 +40,6 @@ def serialize_dataframe(df):
             'future': values[5],
             'target': values[6],
             'date': values[7]
->>>>>>> c350fd768ac6c9cf71676c2bdfe7cccbb6e42d13
         }
         response_array.append(data_object)
 
@@ -78,18 +65,9 @@ def getStockPrediction(ticker):
     data = MlModel.clean_data(stock_data["Time Series (Daily)"], "float")
     historic_predictions = MlModel.run_model(data)
 
-<<<<<<< HEAD
-    # response will be an array of objects where each object has a key of 0, 1 and date
-    # 0 and 1 have probability values
-    response = serialize_model_data(
-        historic_predictions["historic_predictions"],
-        historic_predictions["historic_prediction_dates"],
-    )
-=======
     #response will be an array of objects where each object has a key of 0, 1 and date
     #0 and 1 have probability values
     response = serialize_model_data(historic_predictions['historic_predictions'],historic_predictions['historic_prediction_dates'])
->>>>>>> c350fd768ac6c9cf71676c2bdfe7cccbb6e42d13
 
     return jsonify(response)
 
@@ -110,14 +88,9 @@ def getHistoricPrices(ticker):
     )
 
     stock_data = api_resp.json()
-<<<<<<< HEAD
-    data = MlModel.clean_data(stock_data["Time Series (Daily)"], "float")
-    dataframe = data["dataframe"]
-=======
     data = MlModel.clean_data(stock_data['Time Series (Daily)'],'float')
     dataframe = data['dataframe']
     print(dataframe)
->>>>>>> c350fd768ac6c9cf71676c2bdfe7cccbb6e42d13
     response = serialize_dataframe(dataframe)
 
     return jsonify(response)

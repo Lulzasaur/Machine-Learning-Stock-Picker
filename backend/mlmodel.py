@@ -142,7 +142,6 @@ def historic_preprocess_df(df):
         if len(prev_days) == FUTURE_PERIOD_PREDICT-1:  # make sure we have SEQ_LEN sequences!
             sequential_data.append([ np.array(prev_days), i[-1]])  # append those bad boys!
 
-    print(len(sequential_data))
     X = [] #list of all the values being processed by the ML - what the ML uses to make a prediction
     y = [] #list of all the dates
 

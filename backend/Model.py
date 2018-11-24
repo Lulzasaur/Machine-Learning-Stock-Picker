@@ -20,7 +20,7 @@ from helpers import classify, preprocess_df, prediction_preprocess_df, historic_
 from KEY import API_SECRET_KEY
 
 
-SEQ_LEN=30 #number of days for a sequence to predice a 'buy' or 'sell'
+SEQ_LEN=15 #number of days for a sequence to predice a 'buy' or 'sell'
 FUTURE_PERIOD_PREDICT = SEQ_LEN + 1
 EPOCHS=1
 BATCH_SIZE=10
