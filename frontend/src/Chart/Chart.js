@@ -3,6 +3,14 @@ import axios from 'axios';
 /** HIGHCHARTS*/
 import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
+import { css } from 'react-emotion';
+import { ClimbingBoxLoader, PacmanLoader } from 'react-spinners';
+
+const override = css`
+  display: block;
+  margin: 0 auto;
+  border-color: red;
+`;
 
 class Chart extends Component {
   constructor(props) {
@@ -11,12 +19,14 @@ class Chart extends Component {
       predictiveOptions: {
         rangeSelector: { selected: 1 },
         title: { text: '' },
-        series: []
+        series: [],
+        isLoading: true
       },
       historicOptions: {
         rangeSelector: { selected: 1 },
         title: { text: '' },
-        series: []
+        series: [],
+        isLoading: true
       }
     };
   }
@@ -26,7 +36,7 @@ class Chart extends Component {
       console.log('getting data');
       //Grabbing Historic Stock data for first Chart
       let historicData = await axios.get(
-        'http://127.0.0.1:5000/silas/aapl/historics'
+        `http://127.0.0.1:5000/silas/${this.props.match.params.ticker.toLowerCase()}/historics`
       );
 
       //Since Data comes latest date first, we need to reverse and map
@@ -46,27 +56,30 @@ class Chart extends Component {
       //Updating the state so components re-render
       this.setState({
         historicOptions: {
-          title: { text: 'AAPL' },
+          title: { text: `${this.props.match.params.ticker}` },
           series: [
             {
-              name: 'AAPL',
+              name: `${this.props.match.params.ticker}`,
               data: data,
               tooltip: {
                 valueDecimals: 2
               }
             }
-          ]
+          ],
+          isLoading: false
         }
       });
 
       //Getting prediction data
-      let predictiveData = await axios.get('http://127.0.0.1:5000/silas/aapl');
+      let predictiveData = await axios.get(
+        `http://127.0.0.1:5000/silas/${this.props.match.params.ticker.toLowerCase()}`
+      );
       console.log(predictiveData);
 
       //Mapping prediction out
       let prediction = await predictiveData.data.reverse().map(dPoint => {
         let startingDate = dPoint.date.split('-');
-        let val = dPoint['0'] >= dPoint['1'] ? dPoint['0'] : dPoint['1'];
+        let val = dPoint['0'] >= dPoint['1'] ? 0 : 1;
         return [
           Date.UTC(startingDate[0], startingDate[1], startingDate[2]),
           val
@@ -77,16 +90,17 @@ class Chart extends Component {
       this.setState({
         predictiveOptions: {
           rangeSelector: { selected: 1 },
-          title: { text: 'AAPL Prediction' },
+          title: { text: `${this.props.match.params.ticker} Prediction` },
           series: [
             {
-              name: 'AAPL Prediction',
+              name: `${this.props.match.params.ticker} Prediction`,
               data: prediction,
               tooltip: {
                 valueDecimals: 2
               }
             }
-          ]
+          ],
+          isLoading: false
         }
       });
     } catch (err) {
@@ -96,21 +110,38 @@ class Chart extends Component {
   render() {
     return (
       <React.Fragment>
-        {/* TODO: Why is this is giving me a bug once it tries to render */}
-        {/* {this.state.historicOptions.series.length === 0 ? (
-          <h1 className="HistoricLoadingBar">Loading Historic Data</h1>
+        {this.state.historicOptions.isLoading ? (
+          <React.Fragment>
+            <h1 className="HistoricLoadingBar">Loading Historic Data</h1>
+            <ClimbingBoxLoader
+              className={override}
+              sizeUnit={'px'}
+              size={25}
+              color={'#123abc'}
+              loading={this.state.isLoading}
+            />
+          </React.Fragment>
         ) : (
-          <React.Fragment> */}
-        <h1>Historic Chart</h1>
-        <HighchartsReact
-          highcharts={Highcharts}
-          constructorType={'stockChart'}
-          options={this.state.historicOptions}
-        />
-        {/* </React.Fragment>
-        )} */}
-        {this.state.predictiveOptions.series.length === 0 ? (
-          <h1 className="Loading Bar">Loading Predictions</h1>
+          <React.Fragment>
+            <h1>Historic Chart</h1>
+            <HighchartsReact
+              highcharts={Highcharts}
+              constructorType={'stockChart'}
+              options={this.state.historicOptions}
+            />
+          </React.Fragment>
+        )}
+        {this.state.predictiveOptions.isLoading ? (
+          <React.Fragment>
+            <h1 className="Loading Bar">Loading Predictions</h1>
+            <PacmanLoader
+              className={override}
+              sizeUnit={'px'}
+              size={45}
+              color={'#123abc'}
+              loading={this.state.isLoading}
+            />
+          </React.Fragment>
         ) : (
           <React.Fragment>
             <h1>Prediction Chart</h1>

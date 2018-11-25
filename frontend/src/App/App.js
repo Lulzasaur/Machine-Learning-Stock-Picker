@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import { Route, Switch } from 'react-router-dom';
-import DisplayContainer from '../DisplayContainer/DisplayContainer';
+import Router from '../Router/Router';
 import {
   Collapse,
   Navbar,
@@ -22,6 +21,7 @@ import {
  *   - Chart page
  *
  * COMPONENT HIERARCHY:
+ * TODO: NEED TO UPDATE THIS
  * https://docs.google.com/drawings/d/1YpgTfRmAHL9connFeR6cSBvD4-hMTtZACfN0oWHIxFQ/edit?usp=sharing
  *
  */
@@ -43,42 +43,49 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+        {/*  */}
+        {/*  */}
         {/* Nav */}
+        {/*  */}
+        {/*  */}
         <div>
-          <Navbar color="light" light expand="md">
+          <Navbar light expand="md">
             <NavbarBrand href="/">Project Silas</NavbarBrand>
             <NavbarToggler onClick={this.toggle} />
             <Collapse isOpen={this.state.isOpen} navbar>
               <Nav className="ml-auto" navbar>
                 {/* <NavItem>
                   <NavLink href="/components/">Components</NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink href="https://github.com/reactstrap/reactstrap">
-                    GitHub
-                  </NavLink>
                 </NavItem> */}
+                <NavItem>
+                  <NavLink href="/">Home</NavLink>
+                </NavItem>
                 <UncontrolledDropdown nav inNavbar>
                   <DropdownToggle nav caret>
                     Tickers
                   </DropdownToggle>
                   <DropdownMenu right>
-                    <DropdownItem href="https://apple.com">Apple</DropdownItem>
-                    <DropdownItem href="https://microsoft.com">
-                      Microsoft
+                    <DropdownItem href="/silas/GOOGL">
+                      Alphabet (Google)
                     </DropdownItem>
+                    <DropdownItem href="/silas/AMZN">Amazon</DropdownItem>
+                    <DropdownItem href="/silas/AAPL">Apple</DropdownItem>
+                    <DropdownItem href="/silas/FB">Facebook</DropdownItem>
+                    <DropdownItem href="/silas/NFLX">Netflix</DropdownItem>
+                    <DropdownItem href="/silas/SPY">S&P 500 ETF</DropdownItem>
+                    {/* <DropdownItem href="/silas/">Microsoft</DropdownItem> */}
                     <DropdownItem divider />
-                    <DropdownItem>Reset</DropdownItem>
+                    <DropdownItem href="/">Home</DropdownItem>
                   </DropdownMenu>
                 </UncontrolledDropdown>
               </Nav>
             </Collapse>
           </Navbar>
         </div>
+        {/*  */}
+        {/*  */}
         {/* Router */}
-        <Switch>
-          <Route eact path="/" render={() => <DisplayContainer />} />
-        </Switch>
+        <Router />
       </div>
     );
   }

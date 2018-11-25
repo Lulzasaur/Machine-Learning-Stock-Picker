@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import Chart from '../Chart/Chart';
+import TickerForm from '../TickerForm/TickerForm';
 
-class DisplayContainer extends Component {
+class TickerFormContainer extends Component {
   render() {
     return (
       <React.Fragment>
-        <Chart />
+        <TickerForm />
         {/* TODO: Add more components once we know what else there is
             to display */}
       </React.Fragment>
@@ -13,4 +13,4 @@ class DisplayContainer extends Component {
   }
 }
 
-export default DisplayContainer;
+export default TickerFormContainer;
