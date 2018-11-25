@@ -3,6 +3,14 @@ import axios from 'axios';
 /** HIGHCHARTS*/
 import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
+import { css } from 'react-emotion';
+import { ClimbingBoxLoader, PacmanLoader } from 'react-spinners';
+
+const override = css`
+  display: block;
+  margin: 0 auto;
+  border-color: red;
+`;
 
 class Chart extends Component {
   constructor(props) {
@@ -11,12 +19,14 @@ class Chart extends Component {
       predictiveOptions: {
         rangeSelector: { selected: 1 },
         title: { text: '' },
-        series: []
+        series: [],
+        isLoading: true
       },
       historicOptions: {
         rangeSelector: { selected: 1 },
         title: { text: '' },
-        series: []
+        series: [],
+        isLoading: true
       }
     };
   }
@@ -55,7 +65,8 @@ class Chart extends Component {
                 valueDecimals: 2
               }
             }
-          ]
+          ],
+          isLoading: false
         }
       });
 
@@ -88,7 +99,8 @@ class Chart extends Component {
                 valueDecimals: 2
               }
             }
-          ]
+          ],
+          isLoading: false
         }
       });
     } catch (err) {
@@ -98,21 +110,38 @@ class Chart extends Component {
   render() {
     return (
       <React.Fragment>
-        {/* TODO: Why is this is giving me a bug once it tries to render */}
-        {/* {this.state.historicOptions.series.length === 0 ? (
-          <h1 className="HistoricLoadingBar">Loading Historic Data</h1>
+        {this.state.historicOptions.isLoading ? (
+          <React.Fragment>
+            <h1 className="HistoricLoadingBar">Loading Historic Data</h1>
+            <ClimbingBoxLoader
+              className={override}
+              sizeUnit={'px'}
+              size={25}
+              color={'#123abc'}
+              loading={this.state.isLoading}
+            />
+          </React.Fragment>
         ) : (
-          <React.Fragment> */}
-        <h1>Historic Chart</h1>
-        <HighchartsReact
-          highcharts={Highcharts}
-          constructorType={'stockChart'}
-          options={this.state.historicOptions}
-        />
-        {/* </React.Fragment>
-        )} */}
-        {this.state.predictiveOptions.series.length === 0 ? (
-          <h1 className="Loading Bar">Loading Predictions</h1>
+          <React.Fragment>
+            <h1>Historic Chart</h1>
+            <HighchartsReact
+              highcharts={Highcharts}
+              constructorType={'stockChart'}
+              options={this.state.historicOptions}
+            />
+          </React.Fragment>
+        )}
+        {this.state.predictiveOptions.isLoading ? (
+          <React.Fragment>
+            <h1 className="Loading Bar">Loading Predictions</h1>
+            <PacmanLoader
+              className={override}
+              sizeUnit={'px'}
+              size={45}
+              color={'#123abc'}
+              loading={this.state.isLoading}
+            />
+          </React.Fragment>
         ) : (
           <React.Fragment>
             <h1>Prediction Chart</h1>

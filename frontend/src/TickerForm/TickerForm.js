@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import { Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
 /** Overall Form component:
  *  - Form that handles ticker selection
  *
@@ -32,27 +32,28 @@ class TickerForm extends Component {
     console.log('tickerform props', this.props);
     return (
       <React.Fragment>
-        <form onSubmit={this.handleSubmit}>
-          <label htmlFor="">Select Ticker</label>
-          <select
-            name="ticker"
-            id="ticker"
-            required="required"
-            value={this.state.ticker}
-            onChange={this.handleChange}
-          >
-            <option value="" />
-            {/* TODO: Once we have more tickers, make this dynamic or expand */}
-            <option value="GOOGL">Alphabet (Google)</option>
-            <option value="AMZN">Amazon</option>
-            <option value="AAPL">Apple</option>
-            <option value="FB">Facebook</option>
-            <option value="NFLX">Netflix</option>
-            <option value="SPY">S&P 500 ETF</option>
-          </select>
-          <br />
-          <button>Get Predictions</button>
-        </form>
+        {/* TODO: Make length better */}
+        <Form onSubmit={this.handleSubmit}>
+          <FormGroup>
+            <Input
+              type="select"
+              name="ticker"
+              id="ticker"
+              required="required"
+              value={this.state.ticker}
+              onChange={this.handleChange}
+            >
+              <option value="">Select a ticker</option>
+              <option value="GOOGL">Alphabet (Google)</option>
+              <option value="AMZN">Amazon</option>
+              <option value="AAPL">Apple</option>
+              <option value="FB">Facebook</option>
+              <option value="NFLX">Netflix</option>
+              <option value="SPY">S&P 500 ETF</option>
+            </Input>
+          </FormGroup>
+          <Button>Submit</Button>
+        </Form>
       </React.Fragment>
     );
   }

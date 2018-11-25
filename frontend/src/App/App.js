@@ -49,7 +49,7 @@ class App extends Component {
         {/*  */}
         {/*  */}
         <div>
-          <Navbar color="light" light expand="md">
+          <Navbar light expand="md">
             <NavbarBrand href="/">Project Silas</NavbarBrand>
             <NavbarToggler onClick={this.toggle} />
             <Collapse isOpen={this.state.isOpen} navbar>
