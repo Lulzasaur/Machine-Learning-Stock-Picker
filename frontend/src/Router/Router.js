@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import HomeContainer from '../HomeContainer/HomeContainer';
-import TickerContainer from '../TickerContainer/TickerContainer';
+import ChartContainer from '../ChartContainer/ChartContainer';
 
 /** Router Component:
  * TODO: Add what this component does
@@ -18,7 +18,7 @@ class Router extends Component {
         <Route
           exact
           path="/silas/:ticker"
-          render={props => <TickerContainer {...props} />}
+          render={props => <ChartContainer {...props} />}
         />
       </Switch>
     );

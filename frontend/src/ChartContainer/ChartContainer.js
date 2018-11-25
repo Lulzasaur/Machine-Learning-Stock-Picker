@@ -6,7 +6,7 @@ import Chart from '../Chart/Chart';
  *
  */
 
-class HomeContainer extends Component {
+class ChartContainer extends Component {
   render() {
     return (
       <React.Fragment>
@@ -19,4 +19,4 @@ class HomeContainer extends Component {
   }
 }
 
-export default HomeContainer;
+export default ChartContainer;
