@@ -6,7 +6,7 @@ import React, { Component } from 'react';
  */
 
 //TODO: Refactor to make multi-use
-class Form extends Component {
+class TickerForm extends Component {
   constructor(props) {
     super(props);
     //local state for form
@@ -24,11 +24,12 @@ class Form extends Component {
 
   handleSubmit(evt) {
     evt.preventDefault();
-    this.props.ticker(this.state.ticker);
+    this.props.history.push(`/silas/${this.state.ticker}`);
     this.setState({ ticker: '' });
   }
 
   render() {
+    console.log('tickerform props', this.props);
     return (
       <React.Fragment>
         <form onSubmit={this.handleSubmit}>
@@ -42,12 +43,19 @@ class Form extends Component {
           >
             <option value="" />
             {/* TODO: Once we have more tickers, make this dynamic or expand */}
+            <option value="GOOGL">Alphabet (Google)</option>
+            <option value="AMZN">Amazon</option>
             <option value="AAPL">Apple</option>
+            <option value="FB">Facebook</option>
+            <option value="NFLX">Netflix</option>
+            <option value="SPY">S&P 500 ETF</option>
           </select>
+          <br />
+          <button>Get Predictions</button>
         </form>
       </React.Fragment>
     );
   }
 }
 
-export default Form;
+export default TickerForm;
