@@ -1,11 +1,17 @@
 import React, { Component } from 'react';
 import Chart from '../Chart/Chart';
 
-class DisplayContainer extends Component {
+/** TickerContainer Component:
+ * TODO: Add what this component does
+ *
+ */
+
+class HomeContainer extends Component {
   render() {
     return (
       <React.Fragment>
-        <Chart />
+        {/* Pass down functions from Routes */}
+        <Chart {...this.props} />
         {/* TODO: Add more components once we know what else there is
             to display */}
       </React.Fragment>
@@ -13,4 +19,4 @@ class DisplayContainer extends Component {
   }
 }
 
-export default DisplayContainer;
+export default HomeContainer;

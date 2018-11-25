@@ -26,7 +26,7 @@ class Chart extends Component {
       console.log('getting data');
       //Grabbing Historic Stock data for first Chart
       let historicData = await axios.get(
-        'http://127.0.0.1:5000/silas/spy/historics'
+        `http://127.0.0.1:5000/silas/${this.props.match.params.ticker.toLowerCase()}/historics`
       );
 
       //Since Data comes latest date first, we need to reverse and map
@@ -46,10 +46,10 @@ class Chart extends Component {
       //Updating the state so components re-render
       this.setState({
         historicOptions: {
-          title: { text: 'SPY' },
+          title: { text: `${this.props.match.params.ticker}` },
           series: [
             {
-              name: 'SPY',
+              name: `${this.props.match.params.ticker}`,
               data: data,
               tooltip: {
                 valueDecimals: 2
@@ -60,13 +60,15 @@ class Chart extends Component {
       });
 
       //Getting prediction data
-      let predictiveData = await axios.get('http://127.0.0.1:5000/silas/spy');
+      let predictiveData = await axios.get(
+        `http://127.0.0.1:5000/silas/${this.props.match.params.ticker.toLowerCase()}`
+      );
       console.log(predictiveData);
 
       //Mapping prediction out
       let prediction = await predictiveData.data.reverse().map(dPoint => {
         let startingDate = dPoint.date.split('-');
-        let val = dPoint['0'] >= dPoint['1'] ? dPoint['0'] : dPoint['1'];
+        let val = dPoint['0'] >= dPoint['1'] ? 0 : 1;
         return [
           Date.UTC(startingDate[0], startingDate[1], startingDate[2]),
           val
@@ -77,10 +79,10 @@ class Chart extends Component {
       this.setState({
         predictiveOptions: {
           rangeSelector: { selected: 1 },
-          title: { text: 'SPY Prediction' },
+          title: { text: `${this.props.match.params.ticker} Prediction` },
           series: [
             {
-              name: 'SPY Prediction',
+              name: `${this.props.match.params.ticker} Prediction`,
               data: prediction,
               tooltip: {
                 valueDecimals: 2
