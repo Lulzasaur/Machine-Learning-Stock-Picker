@@ -1,5 +1,5 @@
 from unittest import TestCase
-from app import app
+from app import app, get_stock_data_api
 
 class FlaskTests(TestCase):
 
@@ -7,6 +7,12 @@ class FlaskTests(TestCase):
 
         self.client = app.test_client()
         app.config['TESTING'] = True
+    
+    def test_api_call(self):
+        result = get_stock_data_api('AAPL')
+        print(result)
+        self.assertTrue(type(result)is dict)
+
 
     def test_prediction_route(self):
         result = self.client.get("/silas/AAPL")
@@ -16,5 +22,4 @@ class FlaskTests(TestCase):
     def test_historic_route(self):
         result = self.client.get("/silas/AAPL/historics")
         self.assertEqual(result.status_code, 200)
-        print(result.data)
         self.assertIn(b'"open"' and b'"high"' and b'"low"' and b'"close"', result.data)
