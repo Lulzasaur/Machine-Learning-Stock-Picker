@@ -113,8 +113,6 @@ class MlModel:
             # callbacks=[tensorboard, checkpoint],
         )
 
-        print(history)
-
         # Score model
         score = model.evaluate(dataObject['validation_x'], dataObject['validation_y'], verbose=0)
         print('Test loss:', score[0])
