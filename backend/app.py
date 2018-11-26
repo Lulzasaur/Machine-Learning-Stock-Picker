@@ -28,20 +28,9 @@ def serialize_dataframe(df):
     index_values = df.index.values
     df['dates'] = index_values
     df_values = df.values.tolist()
-    print(df_values)
     response_array = []
     for values in df_values:
         data_object = {
-<<<<<<< HEAD
-            "open": values[0],
-            "high": values[1],
-            "low": values[2],
-            "close": values[3],
-            "volume": values[4],
-            "future": values[5],
-            "target": values[6],
-            "date": values[7]
-=======
             'open': values[0],
             'high': values[1],
             'low': values[2],
@@ -50,7 +39,6 @@ def serialize_dataframe(df):
             'future': values[5],
             'target': values[6],
             'date': values[7]
->>>>>>> d1866fd79184c59d2aaefb9a952f80d302fed986
         }
         response_array.append(data_object)
 
@@ -76,18 +64,9 @@ def getStockPrediction(ticker):
     data = MlModel.clean_data(stock_data["Time Series (Daily)"], "float")
     historic_predictions = MlModel.run_model(data)
 
-<<<<<<< HEAD
-    # response will be an array of objects where each object has a key of 0, 1 and date
-    # 0 and 1 have probability values
-    response = serialize_model_data(
-        historic_predictions["historic_predictions"],
-        historic_predictions["historic_prediction_dates"],
-    )
-=======
     #response will be an array of objects where each object has a key of 0, 1 and date
-    #0 and 1 have probability values
+    #0 and 1 have probability values associated with them
     response = serialize_model_data(historic_predictions['historic_predictions'],historic_predictions['historic_prediction_dates'])
->>>>>>> d1866fd79184c59d2aaefb9a952f80d302fed986
 
     return jsonify(response)
 
@@ -108,14 +87,8 @@ def getHistoricPrices(ticker):
     )
 
     stock_data = api_resp.json()
-<<<<<<< HEAD
-    data = MlModel.clean_data(stock_data["Time Series (Daily)"], "float")
-    dataframe = data["dataframe"]
-=======
     data = MlModel.clean_data(stock_data['Time Series (Daily)'],'float')
     dataframe = data['dataframe']
-    print(dataframe)
->>>>>>> d1866fd79184c59d2aaefb9a952f80d302fed986
     response = serialize_dataframe(dataframe)
 
     return jsonify(response)
