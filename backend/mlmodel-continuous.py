@@ -22,10 +22,10 @@ from KEY import API_SECRET_KEY
 
 ticker = 'SPY'
 BASE_URL = f'https://www.alphavantage.co/query'
-SEQ_LEN=10 #number of days for a sequence to produce a 'buy' or 'sell'
+SEQ_LEN=30 #number of days for a sequence to produce a 'buy' or 'sell'
 SHIFT_FUTURE = 1
 FUTURE_PERIOD_PREDICT = SEQ_LEN
-EPOCHS=60
+EPOCHS=10
 BATCH_SIZE=10
 PCT=0.05
 
@@ -50,7 +50,7 @@ def preprocess_df(df):
             sequential_data.append([scaler.fit_transform(np.array(prev_days)), predictions[prediction_pointer]])  # append those bad boys!
             prediction_pointer = prediction_pointer+1
 
-    random.shuffle(sequential_data)  # shuffle for good measure.
+    # random.shuffle(sequential_data)  # shuffle for good measure.
 
     #above code constructs a list of "sequential" data (of SEQ_LEN long). the list will be fed
     #into the ML model
@@ -101,7 +101,12 @@ train_x, train_y = preprocess_df(main_df)
 validation_x, validation_y = preprocess_df(validation_main_df)
 prediction_x, prediction_y = preprocess_df(prediction_df)
 
-historic_prediction_x, historic_prediction_dates = preprocess_df(df)
+historic_prediction_x, historic_prediction_y = preprocess_df(df)
+
+print('DFs *********************')
+print('historic_prediction_x',historic_prediction_x)
+print('historic_prediction_y',historic_prediction_y[0:10])
+print('DFs *********************')
 
 #model *************************
 
@@ -119,15 +124,14 @@ model.add(LSTM(128))
 model.add(Dropout(0.2))
 model.add(BatchNormalization())
 
-model.add(Dense(32, activation='relu'))
+model.add(Dense(32))
 model.add(Dropout(0.2))
 
 model.add(Dense(1))
 
 # Compile model
 
-model.compile(optimizer=Adam(lr=0.0005),loss='mean_squared_error')
-
+model.compile(optimizer=RMSprop(lr=0.005),loss='mean_squared_error')
 
 # Train model
 history = model.fit(
@@ -142,7 +146,7 @@ history = model.fit(
 
 # Score model
 score = model.evaluate(validation_x, validation_y, verbose=0)
-print(score)
+print('Score: ',score)
 
 # Make a prediction
 
@@ -152,7 +156,9 @@ predictions = model.predict(
     verbose=1,
 )
 
-print(predictions)
+print('Current Prediction: ',predictions)
 
 # probability = model.predict_proba(prediction_x)
-# historic_predictions = model.predict(historic_prediction_x)
+historic_predictions = model.predict(historic_prediction_x)
+
+print('Historic Predictions:',historic_predictions[0:10])
